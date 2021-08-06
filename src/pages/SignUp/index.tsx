@@ -3,17 +3,27 @@ import { FiArrowLeft, FiUser, FiLock } from 'react-icons/fi';
 import { Form } from "@unform/web";
 import * as Yup from "yup";
 import { FormHandles } from '@unform/core';
+import api from '../../services/api';
+import { useToast } from '../../hooks/toast';
 
 import { Container, Content, Background } from './styles';
 
 import Input from "../../components/Input";
 import Button from '../../components/Button';
 import getValidationErrors from '../../utils/getValidationErrors';
+import { Link, useHistory } from 'react-router-dom';
+
+interface SignUpFormData {
+  email: string;
+  senha: string;
+}
 
 const SignUp: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
+  const history = useHistory();
+  const { addToast } = useToast();
 
-  const handleSubmit = useCallback(async (data: object) => {
+  const handleSubmit = useCallback(async (data: SignUpFormData) => {
     try {
         formRef.current?.setErrors({});
 
@@ -23,14 +33,34 @@ const SignUp: React.FC = () => {
         });
 
         await schema.validate(data, {
-            abortEarly: false,
-        });
+          abortEarly: false,
+        })
+        await api.post('/pessoas/usuario', data);
+
+        history.push('/')
+
+        addToast({
+          type: 'success',
+          title: 'Cadastro realizado',
+          description: 'Voce ja pode realizar seu login',
+        })
 
     } catch(err) {
-      const errors = getValidationErrors(err);
-      formRef.current?.setErrors(errors);
+      if (err instanceof Yup.ValidationError) {
+        const errors = getValidationErrors(err);
+        formRef.current?.setErrors(errors);
+
+      return
+
+      }
+
+      addToast ({
+        type: 'error',
+        title: 'erro',
+        description: 'erro',
+      })
     }
-  }, []);
+  }, [addToast, history]);
 
   return (
     <Container>
@@ -45,10 +75,10 @@ const SignUp: React.FC = () => {
           <Button type="submit">Cadastrar</Button> 
         </Form>
 
-        <a href="./">
+        <Link to="/">
           <FiArrowLeft />
           Voltar para o Login
-        </a>
+        </Link>
       </Content>
     </Container>
   );

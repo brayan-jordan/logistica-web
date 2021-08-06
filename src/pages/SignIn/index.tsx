@@ -11,6 +11,7 @@ import { Form } from '@unform/web';
 import getValidationErrors from '../../utils/getValidationErrors';
 import { FormHandles } from '@unform/core';
 import { useToast } from '../../hooks/toast';
+import { Link, useHistory } from 'react-router-dom';
 
 interface SignInData {
   email: string;
@@ -22,6 +23,7 @@ const SignIn: React.FC = () => {
 
   const { signIn } = useAuth();
   const { addToast } = useToast();
+  const history = useHistory();
 
   const handleSubmit = useCallback(async (data: SignInData) => {
     try {
@@ -40,6 +42,9 @@ const SignIn: React.FC = () => {
           email: data.email,
           senha: data.senha
         });
+
+        history.push('/dashboard');
+
     } catch(err) {
       
       if(err instanceof Yup.ValidationError) {
@@ -55,7 +60,7 @@ const SignIn: React.FC = () => {
         description: "Ocorreu um erro ao fazer login"
       });
     }
-  }, [signIn, addToast]);
+  }, [signIn, addToast, history]);
 
   return(
     <Container>
@@ -71,10 +76,10 @@ const SignIn: React.FC = () => {
           <a href="./">Esqueci minha senha</a> 
         </Form>
 
-        <a href="./">
+        <Link to="./signup">
           <FiLogIn />
           Criar conta
-        </a>
+        </Link>
       </Content>
       <Background />
     </Container>
