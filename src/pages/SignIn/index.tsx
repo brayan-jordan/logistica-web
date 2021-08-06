@@ -36,13 +36,18 @@ const SignIn: React.FC = () => {
             abortEarly: false,
         });
 
-        signIn({
+        await signIn({
           email: data.email,
           senha: data.senha
         });
     } catch(err) {
-      const errors = getValidationErrors(err);
-      formRef.current?.setErrors(errors);
+      
+      if(err instanceof Yup.ValidationError) {
+        const errors = getValidationErrors(err);
+        formRef.current?.setErrors(errors);
+
+        return
+      }
 
       addToast({
         type: "error",
